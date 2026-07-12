@@ -3,37 +3,37 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-
+# -----------------------------------------------------------------------
+# PAGE CONFIG
+# -----------------------------------------------------------------------
 st.set_page_config(
     page_title="Insurance Website Analytics Dashboard",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-#data loading
-import os
-
+# -----------------------------------------------------------------------
+# DATA LOADING
+# -----------------------------------------------------------------------
 @st.cache_data
 def load_data():
-    file_path = os.path.join(os.path.dirname(__file__), "insurance_data_aggregated.csv")
-
-    df = pd.read_csv(file_path)
-
+    df = pd.read_csv("insurance_data_aggregated.csv")
     df.columns = [c.strip() for c in df.columns]
-
     df = df.rename(columns={
         "TotalNumberOfInsurancePoliciesPurchaed": "Policies",
         "TotalNumberOfInsuranceQuotes": "Quotes",
         "Pages / Session": "PagesPerSession",
         "Avg. Session Duration": "AvgSessionDuration",
     })
-
     return df
 
 df = load_data()
 
-#sidebar
-st.sidebar.title("Filters")
+# -----------------------------------------------------------------------
+# SIDEBAR — FILTERS
+# -----------------------------------------------------------------------
+st.sidebar.title("🔎 Filters")
 st.sidebar.markdown("Use the controls below to explore the data.")
 
 all_channels = sorted(df["Marketing Channel"].unique().tolist())
@@ -68,29 +68,33 @@ metric_choice = st.sidebar.radio(
 
 st.sidebar.markdown("---")
 st.sidebar.caption(
-    "Dashboard built for 5DATA004C Data Science Project Lifecycle. "
-    "Data-aggregated insurance website analytics."
+    "Dashboard built for 5DATA004C — Data Science Project Lifecycle. "
+    "Data: aggregated insurance website analytics."
 )
 
-#filters
+# Apply filters
 filtered = df[
     df["Marketing Channel"].isin(selected_channels)
     & df["Device Category"].isin(selected_devices)
     & df["Users"].between(users_range[0], users_range[1])
 ].copy()
 
-#header
-st.title("Insurance Website Analytics Dashboard")
+# -----------------------------------------------------------------------
+# HEADER
+# -----------------------------------------------------------------------
+st.title("📊 Insurance Website Analytics Dashboard")
 st.markdown(
     "Explore how visitors from different **marketing channels** and **devices** "
-    "behave on the insurance company's website from browsing to quotes to purchases."
+    "behave on the insurance company's website — from browsing to quotes to purchases."
 )
 
 if filtered.empty:
-    st.warning("No data matches the current filter selection.")
+    st.warning("No data matches the current filter selection. Please widen your filters.")
     st.stop()
 
-#kpi's
+# -----------------------------------------------------------------------
+# KPI ROW
+# -----------------------------------------------------------------------
 total_users = int(filtered["Users"].sum())
 total_quotes = int(filtered["Quotes"].sum())
 total_policies = int(filtered["Policies"].sum())
@@ -112,7 +116,10 @@ st.caption(
 )
 
 st.markdown("---")
-#row1
+
+# -----------------------------------------------------------------------
+# ROW 1 — CHANNEL VOLUME & REVENUE
+# -----------------------------------------------------------------------
 col1, col2 = st.columns(2)
 
 with col1:
@@ -132,7 +139,7 @@ with col1:
         color_discrete_sequence=px.colors.qualitative.Set2,
     )
     fig1.update_layout(xaxis_tickangle=-30, legend_title="Device")
-    st.plotly_chart(fig1, use_container_width=True)
+    st.plotly_chart(fig1, width='stretch')
 
 with col2:
     st.subheader("Device Mix (share of Users)")
@@ -145,9 +152,11 @@ with col2:
         color_discrete_sequence=px.colors.qualitative.Set2,
     )
     fig2.update_traces(textinfo="percent+label")
-    st.plotly_chart(fig2, use_container_width=True)
+    st.plotly_chart(fig2, width='stretch')
 
-#row2
+# -----------------------------------------------------------------------
+# ROW 2 — CONVERSION FUNNEL & CONVERSION RATE BY CHANNEL
+# -----------------------------------------------------------------------
 col3, col4 = st.columns(2)
 
 with col3:
@@ -158,20 +167,16 @@ with col3:
             y=["Users", "Quotes Obtained", "Policies Purchased"],
             x=funnel_vals,
             textinfo="value+percent initial",
-            marker={"color": ["#E71453", "#2EEA34", "#1B42C1"]},
+            marker={"color": ["#4C78A8", "#F58518", "#54A24B"]},
         )
     )
-    st.plotly_chart(fig3, use_container_width=True)
+    st.plotly_chart(fig3, width='stretch')
 
 with col4:
     st.subheader("Conversion Rate (%) by Channel")
     conv_by_channel = (
-        filtered.groupby("Marketing Channel")
-        .apply(lambda g: pd.Series({
-            "Users": g["Users"].sum(),
-            "Policies": g["Policies"].sum(),
-        }))
-        .reset_index()
+        filtered.groupby("Marketing Channel", as_index=False)
+        .agg(Users=("Users", "sum"), Policies=("Policies", "sum"))
     )
     conv_by_channel["ConversionRate"] = (
         conv_by_channel["Policies"] / conv_by_channel["Users"] * 100
@@ -187,9 +192,11 @@ with col4:
     )
     fig4.update_traces(texttemplate="%{text}%", textposition="outside")
     fig4.update_layout(xaxis_tickangle=-30, yaxis_title="Conversion Rate (%)")
-    st.plotly_chart(fig4, use_container_width=True)
+    st.plotly_chart(fig4, width='stretch')
 
-#row3
+# -----------------------------------------------------------------------
+# ROW 3 — ENGAGEMENT VS REVENUE (SCATTER)
+# -----------------------------------------------------------------------
 st.subheader("Engagement vs. Revenue: Pages/Session, Session Duration & Revenue")
 fig5 = px.scatter(
     filtered,
@@ -204,13 +211,15 @@ fig5 = px.scatter(
         "AvgSessionDuration": "Avg. Session Duration (s)",
     },
 )
-st.plotly_chart(fig5, use_container_width=True)
+st.plotly_chart(fig5, width='stretch')
 st.caption(
     "Bubble size = Revenue. This chart highlights which channels combine strong "
     "engagement (pages/session, session duration) with high revenue value."
 )
 
-#row4
+# -----------------------------------------------------------------------
+# ROW 4 — HEATMAP: CHANNEL x DEVICE
+# -----------------------------------------------------------------------
 st.subheader("Revenue Heatmap: Channel × Device")
 heat_data = (
     filtered.groupby(["Marketing Channel", "Device Category"])["Revenue"]
@@ -226,11 +235,13 @@ fig6 = px.imshow(
     aspect="auto",
     labels=dict(color="Revenue (£)"),
 )
-st.plotly_chart(fig6, use_container_width=True)
+st.plotly_chart(fig6, width='stretch')
 
-#raw data 
-with st.expander("View filtered raw data"):
-    st.dataframe(filtered, use_container_width=True)
+# -----------------------------------------------------------------------
+# RAW DATA EXPLORER
+# -----------------------------------------------------------------------
+with st.expander("🔍 View filtered raw data"):
+    st.dataframe(filtered, width='stretch')
     csv = filtered.to_csv(index=False).encode("utf-8")
     st.download_button(
         "Download filtered data as CSV",
@@ -239,7 +250,9 @@ with st.expander("View filtered raw data"):
         mime="text/csv",
     )
 
-#insights
+# -----------------------------------------------------------------------
+# KEY INSIGHTS (auto-generated, static text based on full dataset)
+# -----------------------------------------------------------------------
 st.markdown("---")
 st.subheader("💡 Key Insights")
 st.markdown(
