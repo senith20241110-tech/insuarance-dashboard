@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
--
+
 st.set_page_config(
     page_title="Insurance Website Analytics Dashboard",
     page_icon="📊",
