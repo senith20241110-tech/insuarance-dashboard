@@ -27,7 +27,7 @@ def load_data():
 df = load_data()
 
 #sidebar
-st.sidebar.title("🔎 Filters")
+st.sidebar.title(" Filters")
 st.sidebar.markdown("Use the controls below to explore the data.")
 
 all_channels = sorted(df["Marketing Channel"].unique().tolist())
@@ -74,7 +74,7 @@ filtered = df[
 ].copy()
 
 #header
-st.title("Insurance Website Analytics Dashboard")
+st.title(" Insurance Website Analytics Dashboard")
 st.markdown(
     "Explore how visitors from different **marketing channels** and **devices** "
     "behave on the insurance company's website — from browsing to quotes to purchases."
@@ -180,7 +180,7 @@ with col4:
     fig4.update_layout(xaxis_tickangle=-30, yaxis_title="Conversion Rate (%)")
     st.plotly_chart(fig4, use_container_width=True)
 
-#scatter
+#row3
 st.subheader("Engagement vs. Revenue: Pages/Session, Session Duration & Revenue")
 fig5 = px.scatter(
     filtered,
@@ -201,7 +201,7 @@ st.caption(
     "engagement (pages/session, session duration) with high revenue value."
 )
 
-#heatmap
+#row4
 st.subheader("Revenue Heatmap: Channel × Device")
 heat_data = (
     filtered.groupby(["Marketing Channel", "Device Category"])["Revenue"]
@@ -220,7 +220,7 @@ fig6 = px.imshow(
 st.plotly_chart(fig6, use_container_width=True)
 
 #raw data
-with st.expander("View filtered raw data"):
+with st.expander("🔍 View filtered raw data"):
     st.dataframe(filtered, use_container_width=True)
     csv = filtered.to_csv(index=False).encode("utf-8")
     st.download_button(
@@ -230,9 +230,9 @@ with st.expander("View filtered raw data"):
         mime="text/csv",
     )
 
-
+#insights
 st.markdown("---")
-st.subheader("Key Insights")
+st.subheader(" Key Insights")
 st.markdown(
     """
 - **Aggregators** drive disproportionately high revenue and conversion relative to their traffic volume,
