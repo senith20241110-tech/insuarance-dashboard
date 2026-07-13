@@ -127,7 +127,7 @@ with col1:
         color_discrete_sequence=px.colors.qualitative.Set2,
     )
     fig1.update_layout(xaxis_tickangle=-30, legend_title="Device")
-    st.plotly_chart(fig1, width='stretch')
+    st.plotly_chart(fig1, use_container_width=True)
 
 with col2:
     st.subheader("Device Mix (share of Users)")
@@ -140,7 +140,7 @@ with col2:
         color_discrete_sequence=px.colors.qualitative.Set2,
     )
     fig2.update_traces(textinfo="percent+label")
-    st.plotly_chart(fig2, width='stretch')
+    st.plotly_chart(fig2, use_container_width=True)
 
 #row2
 col3, col4 = st.columns(2)
@@ -156,7 +156,7 @@ with col3:
             marker={"color": ["#4C78A8", "#F58518", "#54A24B"]},
         )
     )
-    st.plotly_chart(fig3, width='stretch')
+    st.plotly_chart(fig3, use_container_width=True)
 
 with col4:
     st.subheader("Conversion Rate (%) by Channel")
@@ -178,7 +178,7 @@ with col4:
     )
     fig4.update_traces(texttemplate="%{text}%", textposition="outside")
     fig4.update_layout(xaxis_tickangle=-30, yaxis_title="Conversion Rate (%)")
-    st.plotly_chart(fig4, width='stretch')
+    st.plotly_chart(fig4, use_container_width=True)
 
 #scatter
 st.subheader("Engagement vs. Revenue: Pages/Session, Session Duration & Revenue")
@@ -195,7 +195,7 @@ fig5 = px.scatter(
         "AvgSessionDuration": "Avg. Session Duration (s)",
     },
 )
-st.plotly_chart(fig5, width='stretch')
+st.plotly_chart(fig5, use_container_width=True)
 st.caption(
     "Bubble size = Revenue. This chart highlights which channels combine strong "
     "engagement (pages/session, session duration) with high revenue value."
@@ -217,11 +217,11 @@ fig6 = px.imshow(
     aspect="auto",
     labels=dict(color="Revenue (£)"),
 )
-st.plotly_chart(fig6, width='stretch')
+st.plotly_chart(fig6, use_container_width=True)
 
 #raw data
 with st.expander("View filtered raw data"):
-    st.dataframe(filtered, width='stretch')
+    st.dataframe(filtered, use_container_width=True)
     csv = filtered.to_csv(index=False).encode("utf-8")
     st.download_button(
         "Download filtered data as CSV",
